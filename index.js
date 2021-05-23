@@ -4,6 +4,12 @@ var TinyDB = require("tinydb");
 mint_db = new TinyDB("./mint.db");
 app.use(express.json()); // built-in middleware for express
 const fs = require("fs");
+const PORT = process.env.PORT || 5000
+
+
+app.use(express.static(path.join(__dirname, 'public')));
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'ejs');
 
 var tempMint = [];
 const path = "./mint.db";
