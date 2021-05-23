@@ -7,13 +7,12 @@ app.use(express.json()); // built-in middleware for express
 const fs = require("fs");
 const PORT = process.env.PORT || 5000
 
-
 app.use(express.static(path.join(__dirname, 'public')));
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
 var tempMint = [];
-const path = "./mint.db";
+const pathDB = "./mint.db";
 
 var handleInsert = function (item) {
   mint_db.insertItem(item, function (err) {
@@ -79,7 +78,7 @@ app.get("/mintFind/:id", (req, res) => {
 app.get("/mintRemove", (req, res) => {
   console.log("Delete........:");
   try {
-    fs.unlinkSync(path);
+    fs.unlinkSync(pathDB);
     console.log("file remove");
   } catch (err) {
     console.error(err);
