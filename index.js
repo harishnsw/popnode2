@@ -1,5 +1,6 @@
 const express = require("express");
 const app = express();
+const path = require('path')
 var TinyDB = require("tinydb");
 mint_db = new TinyDB("./mint.db");
 app.use(express.json()); // built-in middleware for express
