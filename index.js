@@ -1,13 +1,20 @@
 const express = require("express");
 const app = express();
+const path = require('path')
 var TinyDB = require("tinydb");
 mint_db = new TinyDB("./mint.db");
 app.use(express.json()); // built-in middleware for express
 const fs = require("fs");
+const PORT = process.env.PORT || 5000
+
+app.use(express.static(path.join(__dirname, 'public')));
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'ejs');
+
 
 var tempMint = [];
 var tempList = [];
-const path = "./mint.db";
+const dbpath = "./mint.db";
 
 var handleInsert = function (item) {
   mint_db.insertItem(item, function (err) {
@@ -68,7 +75,7 @@ app.get("/mintFind/:id", (req, res) => {
 app.get("/mintRemove", (req, res) => {
   console.log("Delete........:");
   try {
-    fs.unlinkSync(path);
+    fs.unlinkSync(dbpath);
     tempMint = [];
     console.log("file remove");
   } catch (err) {
