@@ -105,4 +105,4 @@ app.get("/mintList", (req, res) => {
   res.send(tempList);
 });
 
-app.listen(3009, () => console.log("Listening on port 3009"));
+ app.listen(PORT, () => console.log(`Listening on ${ PORT }`)); 
