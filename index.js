@@ -1,18 +1,13 @@
 const express = require("express");
 const app = express();
-const path = require('path')
 var TinyDB = require("tinydb");
 mint_db = new TinyDB("./mint.db");
 app.use(express.json()); // built-in middleware for express
 const fs = require("fs");
-const PORT = process.env.PORT || 5000
-
-app.use(express.static(path.join(__dirname, 'public')));
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'ejs');
 
 var tempMint = [];
-const pathDB = "./mint.db";
+var tempList = [];
+const path = "./mint.db";
 
 var handleInsert = function (item) {
   mint_db.insertItem(item, function (err) {
@@ -23,11 +18,6 @@ var handleInsert = function (item) {
     console.log("[Insert...: ] ");
   });
 };
-
-app.get("/", function (req, res) {  
-  console.log("db_crud : Live * * * ");
-  res.send("db_crud : Live * * * ");
-});
 
 //
 app.post("/mintAdd", function (req, res) {
@@ -78,7 +68,8 @@ app.get("/mintFind/:id", (req, res) => {
 app.get("/mintRemove", (req, res) => {
   console.log("Delete........:");
   try {
-    fs.unlinkSync(pathDB);
+    fs.unlinkSync(path);
+    tempMint = [];
     console.log("file remove");
   } catch (err) {
     console.error(err);
@@ -87,5 +78,24 @@ app.get("/mintRemove", (req, res) => {
   res.send("Database deleted");
 });
 
-app.listen(PORT, () => console.log(`Listening on ${ PORT }`)); 
+var handleList = function () {
+  tempList = [];
+  console.log("Listing ---------------------> ForEach  :");
+  mint_db.forEach(function (err, item) {
+    if (err) {
+      console.log(err);
+      return;
+    }
+    console.log(item);
+    tempList.push(item);
+  });
+};
 
+app.get("/mintList", (req, res) => {
+  console.log("List........:");
+  mint_db.onReady = handleList;
+  handleList();
+  res.send(tempList);
+});
+
+app.listen(3009, () => console.log("Listening on port 3009"));
