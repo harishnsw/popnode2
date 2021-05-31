@@ -1,21 +1,22 @@
 const express = require("express");
 const app = express();
 const path = require('path')
-var TinyDB = require("tinydb");
-mint_db = new TinyDB("./mint.db");
-app.use(express.json()); // built-in middleware for express
 const fs = require("fs");
-const PORT = process.env.PORT || 5000
 
+app.use(express.json()); // built-in middleware for express
 app.use(express.static(path.join(__dirname, 'public')));
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
+var TinyDB = require("tinydb");
 
-
+//variables
+mint_db = new TinyDB("./mint.db");
+const PORT = process.env.PORT || 5000
 var tempMint = [];
 var tempList = [];
 const dbpath = "./mint.db";
 
+/* fn Insert */
 var handleInsert = function (item) {
   mint_db.insertItem(item, function (err) {
     if (err) {
@@ -26,7 +27,7 @@ var handleInsert = function (item) {
   });
 };
 
-//
+/* get Add */
 app.post("/mintAdd", function (req, res) {
   const _key = Date.now();
   const set = req.body.set;
@@ -46,7 +47,7 @@ app.post("/mintAdd", function (req, res) {
   res.send(record);
 });
 
-//
+/* fn Find */
 var handleFind = function (_key) {
   mint_db.find({ key: _key }, function (err, items) {
     if (err) {
@@ -61,7 +62,7 @@ var handleFind = function (_key) {
   });
 };
 
-//
+/* get Find */
 app.get("/mintFind/:id", (req, res) => {
   console.log("find........:");
   let _id = parseInt(req.params.id);
@@ -72,19 +73,49 @@ app.get("/mintFind/:id", (req, res) => {
   res.send(items);
 });
 
+/*  List Remove  */
+var handleListRemove = function () {
+  tempList = [];
+  mint_db.forEach(function (err, item) {
+    if (err) {
+      console.log(err);
+      return;
+    }
+    console.log("Item :", item._id);
+    mint_db.findByIdAndRemove(item._id, function (err, item) {
+      if (err) {
+        console.log(err);
+        return;
+      }
+    });
+  });
+};
+
+/* Map Remove */
+var handleMapRemove = function () {
+  tempList.map((item) => {
+    console.log("Item :", item._id);
+    mint_db.findByIdAndRemove(item._id, function (err, item) {
+      if (err) {
+        console.log(err);
+        return;
+      }
+    });
+  });
+};
+
+/* GET Remove */
 app.get("/mintRemove", (req, res) => {
   console.log("Delete........:");
-  try {
-    fs.unlinkSync(dbpath);
-    tempMint = [];
-    console.log("file remove");
-  } catch (err) {
-    console.error(err);
-  }
+  mint_db.onReady = handleList;
+  handleList();
 
+  mint_db.onReady = handleMapRemove;
+  handleMapRemove();
   res.send("Database deleted");
 });
 
+/*  fn List  */
 var handleList = function () {
   tempList = [];
   console.log("Listing ---------------------> ForEach  :");
@@ -98,6 +129,7 @@ var handleList = function () {
   });
 };
 
+/* get List*/
 app.get("/mintList", (req, res) => {
   console.log("List........:");
   mint_db.onReady = handleList;
@@ -105,4 +137,4 @@ app.get("/mintList", (req, res) => {
   res.send(tempList);
 });
 
- app.listen(PORT, () => console.log(`Listening on ${ PORT }`)); 
+app.listen(PORT, () => console.log(`Listening on ${ PORT }`)); 
